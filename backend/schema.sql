@@ -1,0 +1,17 @@
+DROP TABLE IF EXISTS user;
+
+CREATE TABLE user(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    created_at DATETIME NOT NULL
+
+);
+CREATE TABLE IF NOT EXISTS roadmaps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    career_name TEXT NOT NULL,
+    roadmap_data TEXT NOT NULL,
+    created_at DATETIME NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES user(id)
+);
