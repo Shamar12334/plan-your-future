@@ -93,28 +93,43 @@ def get_roadmap():
 def init_db():
     conn = sqlite3.connect(app.config['DATABASE'])
     c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS roadmaps (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            career_name TEXT NOT NULL,
-            roadmap_data TEXT NOT NULL,
-            created_at DATETIME NOT NULL
-        )
-    '''
-    )
-    conn.commit()
-    conn.close()
-def save_roadmap(career_name, roadmap_data):
-    conn = sqlite3.connect(app.config['DATABASE'])
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO roadmaps (career_name, roadmap_data, created_at) VALUES (?, ?, ?)",
-        (career_name, json.dumps(roadmap_data), datetime.now())
-    )
+
+    # Read schema.sql and execute it
+    with open('schema.sql', 'r') as f:
+        schema_sql = f.read()
+    c.executescript(schema_sql)
     conn.commit()
     conn.close()
 
+@app.route('/api/save', methods=['POST'])
+def save_roadmap_route():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Missing JSON body"}), 400
+
+    career_name = data.get('career_name')
+    roadmap_data = data.get('roadmap_data')
+
+    if not career_name or not roadmap_data:
+        return jsonify({"error": "career_name and roadmap_data are required"}), 400
+
+    try:
+        conn = sqlite3.connect(app.config['DATABASE'])
+        c = conn.cursor()
+        c.execute(
+            "INSERT INTO roadmaps (career_name, roadmap_data, created_at) VALUES (?, ?, ?)",
+            (career_name, json.dumps(roadmap_data), datetime.now())
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    return jsonify({"message": f"Roadmap for '{career_name}' saved successfully!"})
+
+
 init_db()
+from auth import auth_bp
+app.register_blueprint(auth_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)

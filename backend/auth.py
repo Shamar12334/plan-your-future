@@ -11,7 +11,7 @@ from datetime import datetime
 # Create blueprint
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-DATABASE = os.path.join(os.getcwd(), 'backend.sqlite')
+DATABASE = os.path.join(os.getcwd(),'backend.sqlite')
 
 
 def get_db():
