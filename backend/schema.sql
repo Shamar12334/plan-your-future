@@ -13,5 +13,5 @@ CREATE TABLE IF NOT EXISTS roadmaps (
     career_name TEXT NOT NULL,
     roadmap_data TEXT NOT NULL,
     created_at DATETIME NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES user(id)
+    FOREIGN KEY(user_id) REFERENCES user(id) ON DELETE CASCADE
 );
