@@ -1,3 +1,4 @@
+from auth import auth_bp, get_db, g, login_required
 from flask import Flask, jsonify,request
 from flask_cors import CORS
 import os
@@ -6,7 +7,7 @@ import sqlite3
 import json
 # create and config the app
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 app.config['SECRET_KEY'] = 'dev'
 app.config['DATABASE']= os.path.join(os.getcwd(),'backend.sqlite')
@@ -102,6 +103,7 @@ def init_db():
     conn.close()
 
 @app.route('/api/save', methods=['POST'])
+@login_required
 def save_roadmap_route():
     data = request.get_json()
     if not data:
@@ -117,8 +119,8 @@ def save_roadmap_route():
         conn = sqlite3.connect(app.config['DATABASE'])
         c = conn.cursor()
         c.execute(
-            "INSERT INTO roadmaps (career_name, roadmap_data, created_at) VALUES (?, ?, ?)",
-            (career_name, json.dumps(roadmap_data), datetime.now())
+            "INSERT INTO roadmaps (user_id,career_name, roadmap_data, created_at) VALUES (?, ?, ?,?)",
+            (g.user['id'],career_name, json.dumps(roadmap_data), datetime.now())
         )
         conn.commit()
     finally:
@@ -130,6 +132,16 @@ def save_roadmap_route():
 init_db()
 from auth import auth_bp
 app.register_blueprint(auth_bp)
+@app.route('/api/my-roadmaps', methods=['GET'])
+@login_required
+def my_roadmaps():
+    conn = get_db()
+    rows =conn.execute(
+        "SELECT id, career_name, roadmap_data, created_at FROM roadmaps WHERE user_id = ?",
+        (g.user['id'],)
+    ).fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in rows])
 
 if __name__ == '__main__':
     app.run(debug=True)
