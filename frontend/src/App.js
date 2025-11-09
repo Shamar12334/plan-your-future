@@ -1,19 +1,17 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
+import Auth from "./components/auth";
+import RoadmapPage from "./components/roadmapPage";
+import Dashboard from "./components/dashboard";
 function App() {
-  const[Welcome,setMessage] =useState("loading...")
-  useEffect(() =>{
-    fetch("http://127.0.0.1:5000/") //Backend url
-    .then((response)=> response.json())
-    .then((data)=> setMessage(data.Welcome))
-    .catch((error) =>{
-      console.error("Error fetching from the backend:",error);
-      setMessage("Connection failed");
-    });
-  },[]);
+  const[user,setUser] = useState(null)
   return (
-    <div style={{textAlign: "center",marginTop: "3rem"}}>
+    <div>
       <h1>Plan Your Future</h1>
-      <p>{Welcome}</p>
+      {user ? (
+        <Dashboard username={user}/>
+      ) : (
+        <Auth onLogin={(username) => setUser(username)} />
+      )}
     </div>
   );
 }

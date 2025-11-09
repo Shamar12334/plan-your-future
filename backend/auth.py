@@ -1,4 +1,3 @@
-# auth.py
 import functools
 import sqlite3
 import os
